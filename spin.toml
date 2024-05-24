@@ -7,12 +7,25 @@ authors = ["Daniel Heinze <daheinze@microsoft.com>"]
 description = ""
 
 [[trigger.http]]
-route = "/..."
-component = "openai-wasm"
+route = "/"
+component = "healthcheck"
 
-[component.openai-wasm]
+[[trigger.http]]
+route = "/api/openai"
+component = "openai"
+
+[component.healthcheck]
 source = "target/wasm32-wasi/release/openai_wasm.wasm"
 allowed_outbound_hosts = []
-[component.openai-wasm.build]
+
+[component.healthcheck.build]
+command = "cargo build --target wasm32-wasi --release"
+watch = ["src/**/*.rs", "Cargo.toml"]
+
+[component.openai]
+source = "target/wasm32-wasi/release/openai_wasm.wasm"
+allowed_outbound_hosts = ["https://random-data-api.fermyon.app:443"]
+
+[component.openai.build]
 command = "cargo build --target wasm32-wasi --release"
 watch = ["src/**/*.rs", "Cargo.toml"]
