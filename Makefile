@@ -12,7 +12,7 @@ prepare:
 	@echo "--- Finished preparing the environment ---"
 
 # Replace the variables in the http/test.http.default file with the values of the .env file and create a new file http/test.http
-.PHONY: prepare-http-test 
+.PHONY: prepare-http-test
 prepare-http-test:
 	@echo "- Preparing the http test file -"
 
@@ -26,4 +26,14 @@ prepare-http-test:
 
 	@echo "- Finished creating the test.http file -"
 
+.PHONY: run
+run:
+	@echo "--- Running the application ---"
 
+	spin build
+	export SPIN_VARIABLE_OPENAI_API_KEY=$(AZURE_OPENAI_API_KEY) && \
+	export SPIN_VARIABLE_OPENAI_ENDPOINT=$(AZURE_OPENAI_ENDPOINT) && \
+	export SPIN_VARIABLE_OPENAI_DEPLOYMENT_NAME=$(AZURE_OPENAI_DEPLOYMENT_NAME) && \
+	spin up 
+
+	@echo "--- Finished running the application ---"

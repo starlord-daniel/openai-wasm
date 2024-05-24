@@ -6,6 +6,11 @@ version = "0.1.0"
 authors = ["Daniel Heinze <daheinze@microsoft.com>"]
 description = ""
 
+[variables]
+openai_api_key = { required = true }
+openai_endpoint = { required = true }
+openai_deployment_name = { required = true }
+
 [[trigger.http]]
 route = "/"
 component = "healthcheck"
@@ -24,8 +29,13 @@ watch = ["src/**/*.rs", "Cargo.toml"]
 
 [component.openai]
 source = "target/wasm32-wasi/release/openai_wasm.wasm"
-allowed_outbound_hosts = ["https://random-data-api.fermyon.app:443"]
+allowed_outbound_hosts = ["https://dh-tts-openai.openai.azure.com:443"]
 
 [component.openai.build]
 command = "cargo build --target wasm32-wasi --release"
 watch = ["src/**/*.rs", "Cargo.toml"]
+
+[component.openai.variables]
+openai_api_key = "{{ openai_api_key }}"
+openai_endpoint = "{{ openai_endpoint }}"
+openai_deployment_name = "{{ openai_deployment_name }}"

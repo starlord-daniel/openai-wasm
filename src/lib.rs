@@ -1,8 +1,9 @@
 use anyhow::Result;
 use spin_sdk::{
     http::{IntoResponse, Method, Params, Request, Response, Router},
-    http_component,
+    http_component, variables,
 };
+extern crate serde_json;
 
 /// Handle the GET request to the `/` endpoint, that returns a simple JSON response.
 /// A Spin HTTP component that internally routes requests.
@@ -27,10 +28,43 @@ fn handle_healthcheck(req: Request, _: Params) -> anyhow::Result<impl IntoRespon
 async fn handle_openai(_req: Request, _: Params) -> Result<impl IntoResponse> {
     println!("Sending request to OpenAI API");
 
-    // Create the outbound request object
+    // Load the AZURE_OPENAI_API_KEY from an .env file
+    let api_key = variables::get("openai_api_key")?;
+
+    // Load the AZURE_OPENAI_ENDPOINT from an .env file
+    let endpoint = variables::get("openai_endpoint")?;
+
+    // Load the deployment_name from an .env file
+    let deployment_name = variables::get("openai_deployment_name")?;
+
+    let api_version = "2024-02-01";
+
+    // Create the chat completions url
+    let url = format!(
+        "{}/openai/deployments/{}/chat/completions?api-version={}",
+        endpoint, deployment_name, api_version
+    );
+
+    // Create the request body
+    let body = serde_json::json!({
+        "messages": [
+            {
+                "role": "system",
+                "content": "You are a helpful assistant."
+            },
+            {
+                "role": "user",
+                "content": "If you'd have to choose, what is your favourite movie from the MCU?"
+            }
+        ]
+    });
+
     let req = Request::builder()
-        .method(Method::Get)
-        .uri("https://random-data-api.fermyon.app/animals/json")
+        .method(Method::Post)
+        .uri(url)
+        .header("Content-Type", "application/json")
+        .header("API-Key", api_key)
+        .body(body.to_string())
         .build();
 
     // Send the request and await the response
