@@ -1,3 +1,4 @@
 target/
 .spin/
 test.http
+.env

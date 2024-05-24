@@ -1,13 +1,11 @@
-
-
 ### Azure Endpoints ###
 
-@AZURE_OPENAI_ENDPOINT=YOUR_ENDPOINT
-@AZURE_OPENAI_API_KEY=YOUR_KEY
+@openai_endpoint={{AZURE_OPENAI_ENDPOINT}}
+@openai_api_key={{AZURE_OPENAI_API_KEY}}
 
-POST {{AZURE_OPENAI_ENDPOINT}}/openai/deployments/gpt-35-turbo/chat/completions?api-version=2024-02-01
+POST {{openai_endpoint}}/openai/deployments/gpt-35-turbo/chat/completions?api-version=2024-02-01
 Content-Type: application/json
-API-Key: {{AZURE_OPENAI_API_KEY}}
+API-Key: {{openai_api_key}}
 
 {
     "messages": [
