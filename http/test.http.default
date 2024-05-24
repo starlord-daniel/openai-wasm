@@ -1,0 +1,37 @@
+
+
+### Azure Endpoints ###
+
+@AZURE_OPENAI_ENDPOINT=YOUR_ENDPOINT
+@AZURE_OPENAI_API_KEY=YOUR_KEY
+
+POST {{AZURE_OPENAI_ENDPOINT}}/openai/deployments/gpt-35-turbo/chat/completions?api-version=2024-02-01
+Content-Type: application/json
+API-Key: {{AZURE_OPENAI_API_KEY}}
+
+{
+    "messages": [
+        { 
+            "role": "system", 
+            "content": "You are a helpful assistant."
+        },
+        {
+            "role": "user", 
+            "content": "If you'd have to choose, what is your favourite movie from the MCU?"
+        }
+    ]
+}
+
+### Application defined endpoints ###
+
+@base_url=http://localhost:3000
+
+### Healthcheck ###
+# @name healthcheck
+GET {{base_url}}/
+
+### Open AI ###
+# @name openai
+GET {{base_url}}/api/openai
+
+
