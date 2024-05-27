@@ -11,7 +11,7 @@ extern crate serde_json;
 async fn handle_route(req: Request) -> Response {
     let mut router = Router::new();
     router.any("/*", handle_healthcheck);
-    router.get_async("/api/openai", handle_openai);
+    router.post_async("/api/openai", handle_openai);
     router.handle(req)
 }
 
@@ -45,31 +45,52 @@ async fn handle_openai(_req: Request, _: Params) -> Result<impl IntoResponse> {
         endpoint, deployment_name, api_version
     );
 
-    // Create the request body
-    let body = serde_json::json!({
-        "messages": [
-            {
-                "role": "system",
-                "content": "You are a helpful assistant."
-            },
-            {
-                "role": "user",
-                "content": "If you'd have to choose, what is your favourite movie from the MCU?"
-            }
-        ]
+    // Get the body as json of the incoming request
+    let incoming_request_body = _req.body();
+    let body_json: serde_json::Value = serde_json::from_slice(incoming_request_body)?;
+
+    // Access the messages in the json
+    let messages = body_json["messages"].as_array().unwrap();
+
+    // Create a mutable messages array to build the request for the OpenAI API
+    let mut messages_array = Vec::new();
+
+    // Add a system message to the messages array
+    messages_array.push(serde_json::json!({
+        "role": "system",
+        "content": "You are a helpful assistant."
+    }));
+
+    // Add the incoming messages to the messages array
+    for message in messages {
+        messages_array.push(message.clone());
+    }
+
+    // Create a json object with the messages array
+    let messages_json = serde_json::json!({
+        "messages": messages_array
     });
+    println!("Messages to Open AI API: {}", messages_json);
 
     let req = Request::builder()
         .method(Method::Post)
         .uri(url)
         .header("Content-Type", "application/json")
         .header("API-Key", api_key)
-        .body(body.to_string())
+        .body(messages_json.to_string())
         .build();
 
     // Send the request and await the response
     let res: Response = spin_sdk::http::send(req).await?;
 
-    println!("{:?}", res); // log the response
+    // From the choices/0/message/content save the answer
+    let res_body = res.body();
+    let res_json: serde_json::Value = serde_json::from_slice(res_body)?;
+    let answer = res_json["choices"][0]["message"]["content"]
+        .as_str()
+        .unwrap();
+
+    println!("Answer from Open AI API: {}", answer);
+
     Ok(res)
 }
