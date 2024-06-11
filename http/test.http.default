@@ -30,6 +30,7 @@ GET {{base_url}}/
 
 ### Open AI ###
 # @name openai
-GET {{base_url}}/api/openai
+POST {{base_url}}/api/openai
 
+< request_bodies/sample_openai_query.json
 
