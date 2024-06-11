@@ -10,6 +10,9 @@ description = ""
 openai_api_key = { required = true }
 openai_endpoint = { required = true }
 openai_deployment_name = { required = true }
+search_endpoint = { required = true }
+search_api_key = { required = true }
+search_index_name = { required = true }
 
 [[trigger.http]]
 route = "/"
@@ -18,6 +21,10 @@ component = "healthcheck"
 [[trigger.http]]
 route = "/api/openai"
 component = "openai"
+
+[[trigger.http]]
+route = "/api/search"
+component = "search"
 
 [component.healthcheck]
 source = "target/wasm32-wasi/release/openai_wasm.wasm"
@@ -29,7 +36,7 @@ watch = ["src/**/*.rs", "Cargo.toml"]
 
 [component.openai]
 source = "target/wasm32-wasi/release/openai_wasm.wasm"
-allowed_outbound_hosts = ["https://dh-tts-openai.openai.azure.com:443"]
+allowed_outbound_hosts = ["{{ openai_endpoint }}:443"]
 
 [component.openai.build]
 command = "cargo build --target wasm32-wasi --release"
@@ -39,3 +46,16 @@ watch = ["src/**/*.rs", "Cargo.toml"]
 openai_api_key = "{{ openai_api_key }}"
 openai_endpoint = "{{ openai_endpoint }}"
 openai_deployment_name = "{{ openai_deployment_name }}"
+
+[component.search]
+source = "target/wasm32-wasi/release/openai_wasm.wasm"
+allowed_outbound_hosts = ["{{ search_endpoint }}:443"]
+
+[component.search.build]
+command = "cargo build --target wasm32-wasi --release"
+watch = ["src/**/*.rs", "Cargo.toml"]
+
+[component.search.variables]
+search_endpoint = "{{ search_endpoint }}"
+search_api_key = "{{ search_api_key }}"
+search_index_name = "{{ search_index_name }}"

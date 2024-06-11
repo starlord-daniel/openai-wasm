@@ -87,6 +87,59 @@ pub async fn handle_openai(_req: Request, _: Params) -> Result<impl IntoResponse
 pub async fn handle_search(_req: Request, _: Params) -> Result<impl IntoResponse> {
     println!("Handling request to {:?}", _req.header("spin-full-url"));
 
+    let search_endpoint = variables::get("search_endpoint")?;
+    let index_name = variables::get("search_index_name")?;
+    let api_key = variables::get("search_api_key")?;
+
+    // Build request to the search API
+    let search_url = format!(
+        "{search_endpoint}/indexes('{index_name}')/docs/search.post.search?api-version=2023-11-01"
+    );
+
+    let incoming_request_body = _req.body();
+    let body_json: serde_json::Value = serde_json::from_slice(incoming_request_body)?;
+
+    // Define search parameters
+    let query = body_json["query"].as_str().unwrap();
+
+    // TODO: Update search fields
+    let search_filelds = "name,description";
+
+    // TODO: Perform embedding of the question
+    let question_embedding = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0];
+
+    // define json body
+    let search_body = serde_json::json!(
+    {
+        "count": true,
+        "highlight": "description",
+        "orderby": "rating desc",
+        "queryType": "semantic",
+        "search": query,
+        "searchFields": search_filelds,
+        "searchMode": "any",
+        "skip": 0,
+        "top": 1,
+        "vectorQueries": [
+        {
+            "kind": "vector",
+            "vector": question_embedding,
+            "fields": "descriptionEmbedding",
+            "k": 5,
+            "exhaustive": true
+        }
+        ],
+        "vectorFilterMode": "preFilter"
+    });
+
+    let req = Request::builder()
+        .method(Method::Post)
+        .uri(search_url)
+        .header("Content-Type", "application/json")
+        .header("api-key", api_key)
+        .body(search_body.to_string())
+        .build();
+
     Ok(Response::builder()
         .status(200)
         .header("content-type", "application/json")

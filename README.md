@@ -27,3 +27,16 @@ Prepare the environment with the Makefile:
 ```bash
 make prepare
 ```
+
+Then you can test the APIs and see the requests and responses by looking at the http/test.http file.
+
+It contains requests to the OpenAI API, the internal APIs for OpenAI, Search and Health.
+
+## Links
+
+- [OpenAI](https://openai.com)
+- [Azure Search](https://azure.microsoft.com/en-us/services/search/)
+- [WASM](https://webassembly.org/)
+- [Rust](https://www.rust-lang.org/)
+- [Spin](https://spin.dev)
+- [Search API](https://learn.microsoft.com/rest/api/searchservice/documents/search-post?view=rest-searchservice-2023-11-01&tabs=HTTP)
