@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Chat with Bot</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <style>
+        .chat-container {
+            width: 100%;
+            border: 1px solid #ccc;
+            padding: 10px;
+            overflow-y: auto;
+        }
+
+        .bot-message {
+            text-align: left;
+        }
+
+        .user-message {
+            text-align: right;
+        }
+    </style>
+    <script>
+
+        window.onload = function () {
+
+            document.getElementById('input').addEventListener('keydown', function (e) {
+                if (e.key === 'Enter') {
+                    e.preventDefault(); // Prevents the default action of the Enter key
+                    sendMessage();
+                }
+            });
+        };
+
+        // create gloabl variable to store a list of json objects
+        var MESSAGES = {
+            "messages": []
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('input');
+            const message = input.value;
+
+            MESSAGES["messages"].push({
+                "role": "user",
+                "content": input.value
+            });
+
+            const chat = document.getElementById('chat');
+            const userMessageElement = document.createElement('p');
+            userMessageElement.className = 'user-message';
+            userMessageElement.innerHTML = `<i class="fas fa-user"></i> ${message}`;
+            chat.appendChild(userMessageElement);
+
+            const response = await fetch('/api/openai', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(MESSAGES)
+            });
+
+            const data = await response.json();
+            const botMessage = data.choices[0].message.content;
+
+            MESSAGES["messages"].push(
+                {
+                    "role": "assistant",
+                    "content": botMessage
+                }
+            );
+
+            console.log(MESSAGES);
+
+            const botMessageElement = document.createElement('p');
+            const botMessageWithLineBreaks = botMessage.replace(/\n/g, '<br>');
+            botMessageElement.className = 'bot-message';
+            botMessageElement.innerHTML = `<i class="fas fa-robot"></i> ${botMessageWithLineBreaks}`;
+            chat.appendChild(botMessageElement);
+
+            input.value = '';
+        }
+    </script>
+</head>
+
+<body class="d-flex flex-column align-items-center justify-content-center">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary mb-4 w-100">
+        <a class="navbar-brand" href="#">AI Chat</a>
+    </nav>
+    <h1 class="mb-4">AI chat with WASM</h1>
+
+    <div class="input-group mb-3 col-md-6">
+        <input id="input" type="text" class="form-control" placeholder="Type your message here...">
+        <div class="input-group-append">
+            <button class="btn btn-primary" onclick="sendMessage()">Send</button>
+        </div>
+    </div>
+    <div id="chat" class="chat-container border mb-4 p-3"></div>
+</body>
+
+</html>
+
+</html>

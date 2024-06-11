@@ -10,9 +10,18 @@ extern crate serde_json;
 #[http_component]
 async fn handle_route(req: Request) -> Response {
     let mut router = Router::new();
-    router.any("/*", handle_healthcheck);
+    router.get("/", serve_webpage);
     router.post_async("/api/openai", handle_openai);
+    router.any("/*", handle_healthcheck);
     router.handle(req)
+}
+
+fn serve_webpage(_: Request, _: Params) -> Response {
+    Response::builder()
+        .status(200)
+        .header("content-type", "text/html")
+        .body(include_str!("../main.html"))
+        .build()
 }
 
 fn handle_healthcheck(req: Request, _: Params) -> anyhow::Result<impl IntoResponse> {
@@ -49,9 +58,6 @@ async fn handle_openai(_req: Request, _: Params) -> Result<impl IntoResponse> {
     let incoming_request_body = _req.body();
     let body_json: serde_json::Value = serde_json::from_slice(incoming_request_body)?;
 
-    // Access the messages in the json
-    let messages = body_json["messages"].as_array().unwrap();
-
     // Create a mutable messages array to build the request for the OpenAI API
     let mut messages_array = Vec::new();
 
@@ -61,7 +67,10 @@ async fn handle_openai(_req: Request, _: Params) -> Result<impl IntoResponse> {
         "content": "You are a helpful assistant."
     }));
 
-    // Add the incoming messages to the messages array
+    // Access the messages in the json
+    let messages = body_json["messages"].as_array().unwrap();
+
+    // Add the incoming messages to the new_responses vector
     for message in messages {
         messages_array.push(message.clone());
     }

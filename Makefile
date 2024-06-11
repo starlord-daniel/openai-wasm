@@ -34,6 +34,6 @@ run:
 	export SPIN_VARIABLE_OPENAI_API_KEY=$(AZURE_OPENAI_API_KEY) && \
 	export SPIN_VARIABLE_OPENAI_ENDPOINT=$(AZURE_OPENAI_ENDPOINT) && \
 	export SPIN_VARIABLE_OPENAI_DEPLOYMENT_NAME=$(AZURE_OPENAI_DEPLOYMENT_NAME) && \
-	spin up 
+	spin up
 
 	@echo "--- Finished running the application ---"
